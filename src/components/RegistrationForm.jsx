@@ -301,13 +301,13 @@ export default function RegistrationForm() {
 			/>
 
 			{/* Advertencia de WhatsApp */}
-			<div className='bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded'>
+			<div className='bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 mb-6 rounded'>
 				<div className='flex'>
 					<div className='flex-shrink-0'>
-						<span className='text-yellow-400 text-2xl'>⚠️</span>
+						<span className='text-yellow-400 dark:text-yellow-300 text-2xl'>⚠️</span>
 					</div>
 					<div className='ml-3'>
-						<p className='text-sm text-yellow-800'>
+						<p className='text-sm text-yellow-800 dark:text-yellow-200'>
 							<strong>Importante:</strong> La participación en el grupo de WhatsApp de Emprendedores Anónimos es{" "}
 							<strong>obligatoria</strong> para mantener tu registro en el directorio. Si abandona el grupo, serás
 							removido automáticamente del directorio.
@@ -327,7 +327,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='nombreResponsable'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Nombre del Responsable *
 				</label>
 				<input
@@ -338,7 +338,7 @@ export default function RegistrationForm() {
 					onChange={handleChange}
 					placeholder='Tu nombre completo'
 					required
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
 				/>
 			</div>
 
@@ -346,7 +346,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='whatsapp'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					WhatsApp *
 				</label>
 				<input
@@ -357,7 +357,7 @@ export default function RegistrationForm() {
 					onChange={handleChange}
 					placeholder='+1234567890 o 1234567890'
 					required
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
 				/>
 			</div>
 
@@ -365,7 +365,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='nombreEmprendimiento'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Nombre del Emprendimiento *
 				</label>
 				<input
@@ -376,7 +376,7 @@ export default function RegistrationForm() {
 					onChange={handleChange}
 					placeholder='Nombre de tu negocio'
 					required
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
 				/>
 			</div>
 
@@ -384,7 +384,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='instagram'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Instagram
 				</label>
 				<input
@@ -394,7 +394,7 @@ export default function RegistrationForm() {
 					value={formData.instagram}
 					onChange={handleChange}
 					placeholder='@tu_cuenta'
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
 				/>
 			</div>
 
@@ -402,7 +402,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='facebook'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Facebook
 				</label>
 				<input
@@ -412,7 +412,7 @@ export default function RegistrationForm() {
 					value={formData.facebook}
 					onChange={handleChange}
 					placeholder='Tu página de Facebook'
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
 				/>
 			</div>
 
@@ -420,7 +420,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='descripcion'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Descripción del Emprendimiento *
 				</label>
 				<textarea
@@ -428,17 +428,17 @@ export default function RegistrationForm() {
 					name='descripcion'
 					value={formData.descripcion}
 					onChange={handleChange}
-					placeholder='Cuéntanos qué haces, a quién sirves y qué te diferencia'
+					placeholder='Cuéntanos qué haces, a quién sirves y qué te diferencia. Este contenido se utilizará en nuestras publicaciones de redes sociales.'
 					rows='5'
 					required
-					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition resize-none'></textarea>
+					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition resize-none'></textarea>
 			</div>
 
 			{/* File Upload - Logo */}
 			<div>
 				<label
 					htmlFor='archivoLogo'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Logo o Imagen del Emprendimiento *
 				</label>
 				<div className='relative'>
@@ -454,10 +454,10 @@ export default function RegistrationForm() {
 					/>
 					<label
 						htmlFor='archivoLogo'
-						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 rounded-lg bg-primary-50 hover:bg-primary-100 cursor-pointer transition'>
+						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 dark:border-primary-700 rounded-lg bg-primary-50 dark:bg-primary-900 hover:bg-primary-100 dark:hover:bg-primary-800 cursor-pointer transition'>
 						<div className='text-center'>
 							<svg
-								className='w-8 h-8 text-primary-600 mx-auto mb-2'
+								className='w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2'
 								fill='none'
 								stroke='currentColor'
 								viewBox='0 0 24 24'>
@@ -468,10 +468,10 @@ export default function RegistrationForm() {
 									d='M12 4v16m8-8H4'
 								/>
 							</svg>
-							<p className='text-sm font-medium text-primary-700'>
+							<p className='text-sm font-medium text-primary-700 dark:text-primary-300'>
 								{fileName ? `✓ ${fileName}` : "Haz clic o arrastra una imagen"}
 							</p>
-							<p className='text-xs text-gray-500 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
+							<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
 						</div>
 					</label>
 				</div>
@@ -481,7 +481,7 @@ export default function RegistrationForm() {
 			<div>
 				<label
 					htmlFor='fotoProducto'
-					className='block text-sm font-medium text-gray-700 mb-1'>
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
 					Foto del Producto del Negocio *
 				</label>
 				<div className='relative'>
@@ -497,10 +497,10 @@ export default function RegistrationForm() {
 					/>
 					<label
 						htmlFor='fotoProducto'
-						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 rounded-lg bg-primary-50 hover:bg-primary-100 cursor-pointer transition'>
+						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 dark:border-primary-700 rounded-lg bg-primary-50 dark:bg-primary-900 hover:bg-primary-100 dark:hover:bg-primary-800 cursor-pointer transition'>
 						<div className='text-center'>
 							<svg
-								className='w-8 h-8 text-primary-600 mx-auto mb-2'
+								className='w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2'
 								fill='none'
 								stroke='currentColor'
 								viewBox='0 0 24 24'>
@@ -511,10 +511,10 @@ export default function RegistrationForm() {
 									d='M12 4v16m8-8H4'
 								/>
 							</svg>
-							<p className='text-sm font-medium text-primary-700'>
+							<p className='text-sm font-medium text-primary-700 dark:text-primary-300'>
 								{productFileName ? `✓ ${productFileName}` : "Haz clic o arrastra una imagen"}
 							</p>
-							<p className='text-xs text-gray-500 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
+							<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
 						</div>
 					</label>
 				</div>
