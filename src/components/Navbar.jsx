@@ -54,9 +54,15 @@ export default function Navbar({ isDarkMode, toggleDarkMode }) {
 							className='p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition'
 							aria-label='Toggle dark mode'>
 							{isDarkMode ? (
-								<FaSun size={20} className='text-yellow-500' />
+								<FaSun
+									size={20}
+									className='text-yellow-500'
+								/>
 							) : (
-								<FaMoon size={20} className='text-gray-600' />
+								<FaMoon
+									size={20}
+									className='text-gray-600'
+								/>
 							)}
 						</button>
 
@@ -78,9 +84,15 @@ export default function Navbar({ isDarkMode, toggleDarkMode }) {
 							className='p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition'
 							aria-label='Toggle dark mode'>
 							{isDarkMode ? (
-								<FaSun size={18} className='text-yellow-500' />
+								<FaSun
+									size={18}
+									className='text-yellow-500'
+								/>
 							) : (
-								<FaMoon size={18} className='text-gray-600' />
+								<FaMoon
+									size={18}
+									className='text-gray-600'
+								/>
 							)}
 						</button>
 

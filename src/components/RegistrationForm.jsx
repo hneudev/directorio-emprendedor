@@ -3,6 +3,9 @@ import toast, { Toaster } from "react-hot-toast";
 import ReCAPTCHA from "react-google-recaptcha";
 import imageCompression from "browser-image-compression";
 import { submitForm, validateFormData } from "../services/api";
+import { validateFile } from "../utils/validators";
+import { IMAGE_CONFIG } from "../constants";
+import { logger } from "../utils/logger";
 import SuccessModal from "./SuccessModal";
 
 export default function RegistrationForm() {
@@ -64,20 +67,43 @@ export default function RegistrationForm() {
 			setError("");
 			setLoading(true);
 
-			// Check file type
+			// Validar tipo de archivo
 			if (!file.type.startsWith("image/")) {
+				logger.warn("Tipo de archivo inválido", { fileType: file.type });
 				toast.error("Por favor, selecciona un archivo de imagen (PNG, JPG, GIF)");
 				fileInputRef.current.value = "";
 				setLoading(false);
 				return;
 			}
 
-			// Compress image
+			// VALIDAR TAMAÑO ANTES DE COMPRIMIR
+			const maxSizeMB = IMAGE_CONFIG.MAX_SIZE_MB || 5;
+			const validation = validateFile(file, maxSizeMB);
+
+			if (!validation.valid) {
+				logger.error("Archivo rechazado", {
+					fileName: file.name,
+					fileSize: file.size,
+					maxSize: maxSizeMB * 1024 * 1024,
+				});
+				toast.error(validation.error);
+				fileInputRef.current.value = "";
+				setLoading(false);
+				return;
+			}
+
+			// Comprimir imagen
 			const options = {
-				maxSizeMB: 1,
-				maxWidthOrHeight: 1920,
+				maxSizeMB: IMAGE_CONFIG.MAX_SIZE_MB || 1,
+				maxWidthOrHeight: IMAGE_CONFIG.MAX_WIDTH_OR_HEIGHT || 1920,
 				useWebWorker: true,
 			};
+
+			logger.info("Iniciando compresión de imagen", {
+				fileName: file.name,
+				originalSize: file.size,
+				maxSize: options.maxSizeMB * 1024 * 1024,
+			});
 
 			const compressedFile = await imageCompression(file, options);
 			const reader = new FileReader();
@@ -93,7 +119,17 @@ export default function RegistrationForm() {
 					},
 				}));
 				setFileName(file.name);
+				logger.info("Imagen comprimida y cargada", {
+					fileName: file.name,
+					compressedSize: compressedFile.size,
+				});
 				toast.success("Logo cargado exitosamente");
+				setLoading(false);
+			};
+
+			reader.onerror = () => {
+				logger.error("Error al leer archivo", { fileName: file.name });
+				toast.error("Error al procesar la imagen");
 				setLoading(false);
 			};
 
