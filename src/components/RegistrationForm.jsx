@@ -1,0 +1,547 @@
+import { useState, useRef } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import ReCAPTCHA from "react-google-recaptcha";
+import imageCompression from "browser-image-compression";
+import { submitForm, validateFormData } from "../services/api";
+import SuccessModal from "./SuccessModal";
+
+export default function RegistrationForm() {
+	const [formData, setFormData] = useState({
+		nombreResponsable: "",
+		whatsapp: "",
+		nombreEmprendimiento: "",
+		instagram: "",
+		facebook: "",
+		descripcion: "",
+		archivoLogo: null,
+		fotoProducto: null,
+		captchaToken: null,
+	});
+
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [success, setSuccess] = useState(false);
+	const [showModal, setShowModal] = useState(false);
+	const [fileName, setFileName] = useState("");
+	const [productFileName, setProductFileName] = useState("");
+	const fileInputRef = useRef(null);
+	const productFileInputRef = useRef(null);
+	const recaptchaRef = useRef(null);
+
+	const RECAPTCHA_KEY = import.meta.env.VITE_RECAPTCHA_KEY;
+
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+		setError("");
+
+		// Validación en tiempo real para WhatsApp
+		if (name === "whatsapp") {
+			if (
+				value &&
+				!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(value.replace(/\s/g, ""))
+			) {
+				toast.error("Por favor, ingresa un número de teléfono válido (ej: +1-555-123-4567 o 5551234567)");
+			}
+		}
+
+		// Validación en tiempo real para descripción mínima
+		if (name === "descripcion") {
+			if (value && value.trim().length < 10) {
+				// No mostrar error en tiempo real, solo validar al enviar
+			}
+		}
+	};
+
+	const handleFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		try {
+			setError("");
+			setLoading(true);
+
+			// Check file type
+			if (!file.type.startsWith("image/")) {
+				toast.error("Por favor, selecciona un archivo de imagen (PNG, JPG, GIF)");
+				fileInputRef.current.value = "";
+				setLoading(false);
+				return;
+			}
+
+			// Compress image
+			const options = {
+				maxSizeMB: 1,
+				maxWidthOrHeight: 1920,
+				useWebWorker: true,
+			};
+
+			const compressedFile = await imageCompression(file, options);
+			const reader = new FileReader();
+
+			reader.onload = (event) => {
+				const base64String = event.target.result.split(",")[1];
+				setFormData((prev) => ({
+					...prev,
+					archivoLogo: {
+						data: base64String,
+						mime: compressedFile.type,
+						name: file.name,
+					},
+				}));
+				setFileName(file.name);
+				toast.success("Logo cargado exitosamente");
+				setLoading(false);
+			};
+
+			reader.readAsDataURL(compressedFile);
+		} catch (err) {
+			toast.error("Error al procesar la imagen: " + err.message);
+			fileInputRef.current.value = "";
+			setLoading(false);
+		}
+	};
+
+	const handleProductFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		try {
+			setError("");
+			setLoading(true);
+
+			// Check file type
+			if (!file.type.startsWith("image/")) {
+				toast.error("Por favor, selecciona un archivo de imagen (PNG, JPG, GIF)");
+				productFileInputRef.current.value = "";
+				setLoading(false);
+				return;
+			}
+
+			// Compress image
+			const options = {
+				maxSizeMB: 1,
+				maxWidthOrHeight: 1920,
+				useWebWorker: true,
+			};
+
+			const compressedFile = await imageCompression(file, options);
+			const reader = new FileReader();
+
+			reader.onload = (event) => {
+				const base64String = event.target.result.split(",")[1];
+				setFormData((prev) => ({
+					...prev,
+					fotoProducto: {
+						data: base64String,
+						mime: compressedFile.type,
+						name: file.name,
+					},
+				}));
+				setProductFileName(file.name);
+				toast.success("Foto del producto cargada exitosamente");
+				setLoading(false);
+			};
+
+			reader.readAsDataURL(compressedFile);
+		} catch (err) {
+			toast.error("Error al procesar la imagen: " + err.message);
+			productFileInputRef.current.value = "";
+			setLoading(false);
+		}
+	};
+
+	const handleRecaptcha = (token) => {
+		// reCAPTCHA v2 devuelve un token o null
+		if (token) {
+			setFormData((prev) => ({
+				...prev,
+				captchaToken: token,
+			}));
+			setError("");
+		}
+	};
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setError("");
+		setSuccess(false);
+
+		try {
+			// Validar nombre del responsable
+			if (!formData.nombreResponsable.trim()) {
+				toast.error("Por favor, ingresa el nombre del responsable");
+				return;
+			}
+
+			// Validar WhatsApp
+			if (!formData.whatsapp.trim()) {
+				toast.error("Por favor, ingresa un número de WhatsApp");
+				return;
+			}
+			if (
+				!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(
+					formData.whatsapp.replace(/\s/g, "")
+				)
+			) {
+				toast.error("Por favor, ingresa un número de teléfono válido (ej: +1-555-123-4567 o 5551234567)");
+				return;
+			}
+
+			// Validar nombre del emprendimiento
+			if (!formData.nombreEmprendimiento.trim()) {
+				toast.error("Por favor, ingresa el nombre del emprendimiento");
+				return;
+			}
+
+			// Validar descripción (mínimo 10 caracteres)
+			if (!formData.descripcion.trim()) {
+				toast.error("Por favor, ingresa una descripción del emprendimiento");
+				return;
+			}
+			if (formData.descripcion.trim().length < 10) {
+				toast.error("La descripción debe tener al menos 10 caracteres");
+				return;
+			}
+
+			// Validate form data
+			const validation = validateFormData(formData);
+			if (!validation.isValid) {
+				validation.errors.forEach((error) => toast.error(error));
+				return;
+			}
+
+			if (!formData.captchaToken) {
+				toast.error("Por favor, completa la verificación reCAPTCHA");
+				return;
+			}
+
+			setLoading(true);
+
+			// Submit form
+			await submitForm(formData);
+
+			// Success - mostrar modal
+			setShowModal(true);
+
+			// Limpiar formulario
+			setSuccess(true);
+			setFormData({
+				nombreResponsable: "",
+				whatsapp: "",
+				nombreEmprendimiento: "",
+				instagram: "",
+				facebook: "",
+				descripcion: "",
+				archivoLogo: null,
+				fotoProducto: null,
+				captchaToken: null,
+			});
+			setFileName("");
+			setProductFileName("");
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
+			if (productFileInputRef.current) {
+				productFileInputRef.current.value = "";
+			}
+			if (recaptchaRef.current) {
+				recaptchaRef.current.reset();
+			}
+			setLoading(false);
+		} catch (err) {
+			toast.error(err.message || "Error al enviar el formulario");
+			setLoading(false);
+		}
+	};
+
+	const isFormValid = () => {
+		return (
+			formData.nombreResponsable.trim() &&
+			formData.whatsapp.trim() &&
+			formData.nombreEmprendimiento.trim() &&
+			formData.descripcion.trim() &&
+			formData.archivoLogo &&
+			formData.fotoProducto &&
+			formData.captchaToken &&
+			!loading
+		);
+	};
+
+	return (
+		<form
+			onSubmit={handleSubmit}
+			className='space-y-6'>
+			{/* Toaster para notificaciones */}
+			<Toaster
+				position='top-right'
+				reverseOrder={false}
+				toastOptions={{
+					duration: 4000,
+					style: {
+						background: "#363636",
+						color: "#fff",
+					},
+					success: {
+						duration: 3000,
+						style: {
+							background: "#10b981",
+						},
+					},
+					error: {
+						duration: 4000,
+						style: {
+							background: "#ef4444",
+						},
+					},
+				}}
+			/>
+
+			{/* Advertencia de WhatsApp */}
+			<div className='bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded'>
+				<div className='flex'>
+					<div className='flex-shrink-0'>
+						<span className='text-yellow-400 text-2xl'>⚠️</span>
+					</div>
+					<div className='ml-3'>
+						<p className='text-sm text-yellow-800'>
+							<strong>Importante:</strong> La participación en el grupo de WhatsApp de Emprendedores Anónimos es{" "}
+							<strong>obligatoria</strong> para mantener tu registro en el directorio. Si abandona el grupo, serás
+							removido automáticamente del directorio.
+						</p>
+					</div>
+				</div>
+			</div>
+
+			{/* Modal de éxito */}
+			<SuccessModal
+				isOpen={showModal}
+				onClose={() => setShowModal(false)}
+				nombreEmprendimiento={formData.nombreEmprendimiento}
+			/>
+
+			{/* Nombre del Responsable */}
+			<div>
+				<label
+					htmlFor='nombreResponsable'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Nombre del Responsable *
+				</label>
+				<input
+					type='text'
+					id='nombreResponsable'
+					name='nombreResponsable'
+					value={formData.nombreResponsable}
+					onChange={handleChange}
+					placeholder='Tu nombre completo'
+					required
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+				/>
+			</div>
+
+			{/* WhatsApp */}
+			<div>
+				<label
+					htmlFor='whatsapp'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					WhatsApp *
+				</label>
+				<input
+					type='tel'
+					id='whatsapp'
+					name='whatsapp'
+					value={formData.whatsapp}
+					onChange={handleChange}
+					placeholder='+1234567890 o 1234567890'
+					required
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+				/>
+			</div>
+
+			{/* Nombre del Emprendimiento */}
+			<div>
+				<label
+					htmlFor='nombreEmprendimiento'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Nombre del Emprendimiento *
+				</label>
+				<input
+					type='text'
+					id='nombreEmprendimiento'
+					name='nombreEmprendimiento'
+					value={formData.nombreEmprendimiento}
+					onChange={handleChange}
+					placeholder='Nombre de tu negocio'
+					required
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+				/>
+			</div>
+
+			{/* Instagram */}
+			<div>
+				<label
+					htmlFor='instagram'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Instagram
+				</label>
+				<input
+					type='text'
+					id='instagram'
+					name='instagram'
+					value={formData.instagram}
+					onChange={handleChange}
+					placeholder='@tu_cuenta'
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+				/>
+			</div>
+
+			{/* Facebook */}
+			<div>
+				<label
+					htmlFor='facebook'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Facebook
+				</label>
+				<input
+					type='text'
+					id='facebook'
+					name='facebook'
+					value={formData.facebook}
+					onChange={handleChange}
+					placeholder='Tu página de Facebook'
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
+				/>
+			</div>
+
+			{/* Descripción */}
+			<div>
+				<label
+					htmlFor='descripcion'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Descripción del Emprendimiento *
+				</label>
+				<textarea
+					id='descripcion'
+					name='descripcion'
+					value={formData.descripcion}
+					onChange={handleChange}
+					placeholder='Cuéntanos qué haces, a quién sirves y qué te diferencia'
+					rows='5'
+					required
+					className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition resize-none'></textarea>
+			</div>
+
+			{/* File Upload - Logo */}
+			<div>
+				<label
+					htmlFor='archivoLogo'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Logo o Imagen del Emprendimiento *
+				</label>
+				<div className='relative'>
+					<input
+						type='file'
+						id='archivoLogo'
+						name='archivoLogo'
+						ref={fileInputRef}
+						onChange={handleFileChange}
+						accept='image/*'
+						required
+						className='hidden'
+					/>
+					<label
+						htmlFor='archivoLogo'
+						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 rounded-lg bg-primary-50 hover:bg-primary-100 cursor-pointer transition'>
+						<div className='text-center'>
+							<svg
+								className='w-8 h-8 text-primary-600 mx-auto mb-2'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M12 4v16m8-8H4'
+								/>
+							</svg>
+							<p className='text-sm font-medium text-primary-700'>
+								{fileName ? `✓ ${fileName}` : "Haz clic o arrastra una imagen"}
+							</p>
+							<p className='text-xs text-gray-500 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
+						</div>
+					</label>
+				</div>
+			</div>
+
+			{/* File Upload - Foto del Producto */}
+			<div>
+				<label
+					htmlFor='fotoProducto'
+					className='block text-sm font-medium text-gray-700 mb-1'>
+					Foto del Producto del Negocio *
+				</label>
+				<div className='relative'>
+					<input
+						type='file'
+						id='fotoProducto'
+						name='fotoProducto'
+						ref={productFileInputRef}
+						onChange={handleProductFileChange}
+						accept='image/*'
+						required
+						className='hidden'
+					/>
+					<label
+						htmlFor='fotoProducto'
+						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 rounded-lg bg-primary-50 hover:bg-primary-100 cursor-pointer transition'>
+						<div className='text-center'>
+							<svg
+								className='w-8 h-8 text-primary-600 mx-auto mb-2'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M12 4v16m8-8H4'
+								/>
+							</svg>
+							<p className='text-sm font-medium text-primary-700'>
+								{productFileName ? `✓ ${productFileName}` : "Haz clic o arrastra una imagen"}
+							</p>
+							<p className='text-xs text-gray-500 mt-1'>PNG, JPG, GIF (máx. 1MB)</p>
+						</div>
+					</label>
+				</div>
+			</div>
+
+			{/* reCAPTCHA */}
+			<div className='flex justify-center'>
+				{RECAPTCHA_KEY && (
+					<ReCAPTCHA
+						ref={recaptchaRef}
+						sitekey={RECAPTCHA_KEY}
+						onChange={handleRecaptcha}
+					/>
+				)}
+			</div>
+
+			{/* Submit Button */}
+			<button
+				type='submit'
+				disabled={!isFormValid()}
+				className={`w-full py-3 px-4 rounded-lg font-medium transition duration-200 ${
+					isFormValid()
+						? "bg-primary-600 hover:bg-primary-700 text-white cursor-pointer shadow-md hover:shadow-lg"
+						: "bg-gray-300 text-gray-500 cursor-not-allowed"
+				}`}>
+				{loading ? "Enviando..." : "Registrar Emprendimiento"}
+			</button>
+		</form>
+	);
+}
