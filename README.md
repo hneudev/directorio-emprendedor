@@ -1,262 +1,104 @@
-# 🚀 Directorio Emprendedor
+# Directorio Emprendedor
 
-Una plataforma moderna para conectar emprendedores, facilitar el networking y promover el crecimiento empresarial.
+Una plataforma digital para conectar emprendedores, facilitar networking y promover el crecimiento empresarial en la comunidad.
 
-## 📋 Características
+## Características
 
-- **Landing Page moderna y atractiva** con secciones de presentación, objetivos y llamadas a la acción
-- **Sistema de registro completo** para emprendimientos con validación de datos
-- **Compresión de imágenes** automática usando `browser-image-compression`
-- **Protección contra bots** con reCAPTCHA integrado
-- **Diseño responsivo** optimizado para móvil, tablet y escritorio
-- **Paleta de colores morada/lila** moderna y profesional
-- **Integración con Google Apps Script** para almacenamiento de datos
-- **Navegación fluida** con React Router
+- 🌐 **Landing page** moderna y responsive
+- 📝 **Sistema de registro** con validación de datos
+- 🖼️ **Compresión automática** de imágenes
+- 🛡️ **Protección contra bots** con reCAPTCHA v3
+- 🌙 **Modo oscuro** nativo
+- 📱 **Diseño mobile-first**
+- ☁️ **Backend sin servidor** con Google Apps Script
 
-## 🛠 Tech Stack
+## Requisitos
 
-- **Frontend:**
-  - React 18.2+
-  - Vite 5.0+
-  - Tailwind CSS 3.3+
-  - React Router DOM 6.20+
-  - React Google reCAPTCHA 3.10+
-  - Browser Image Compression 2.0+
+- Node.js 18+
+- npm o yarn
 
-- **Backend:**
-  - Google Apps Script (Web App)
-
-## 📦 Instalación
-
-1. **Clona el repositorio:**
-
-   ```bash
-   git clone <repository-url>
-   cd directorio-emprendedor
-   ```
-
-2. **Instala las dependencias:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configura las variables de entorno:**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Edita el archivo `.env` y añade:**
-   - `VITE_GOOGLE_APPS_SCRIPT_URL`: URL de tu Web App de Google Apps Script
-   - `VITE_RECAPTCHA_KEY`: Tu clave de sitio de reCAPTCHA
-
-## 🚀 Desarrollo
-
-Para iniciar el servidor de desarrollo:
+## Instalación
 
 ```bash
+# Clonar repositorio
+git clone https://github.com/tu-usuario/directorio-emprendedor.git
+cd directorio-emprendedor
+
+# Instalar dependencias
+npm install
+
+# Copiar variables de entorno
+cp .env.example .env
+```
+
+## Configuración
+
+1. **Crea un sitio en [Google reCAPTCHA](https://www.google.com/recaptcha/admin)**
+   - Copia `SITE KEY` y `SECRET KEY`
+   - Pega en `.env`
+
+2. **Crea un Google Apps Script**
+   - Copia el ID del proyecto a `.env` como `VITE_GOOGLE_APPS_SCRIPT_URL`
+
+3. **Variables de entorno** (`.env`):
+   ```
+   VITE_RECAPTCHA_KEY=tu_site_key
+   VITE_GOOGLE_APPS_SCRIPT_URL=tu_appscript_url
+   ```
+
+## Desarrollo
+
+```bash
+# Ejecutar servidor de desarrollo
 npm run dev
+
+# Abrir http://localhost:5173
 ```
 
-La aplicación se abrirá automáticamente en `http://localhost:5173`
-
-## 📁 Estructura del Proyecto
-
-```
-directorio-emprendedor/
-├── src/
-│   ├── components/
-│   │   ├── Navbar.jsx              # Navegación sticky
-│   │   └── RegistrationForm.jsx    # Formulario principal
-│   ├── pages/
-│   │   ├── LandingPage.jsx         # Página de inicio
-│   │   └── RegisterPage.jsx        # Página de registro
-│   ├── services/
-│   │   └── api.js                  # Conexión con Google Apps Script
-│   ├── App.jsx                     # Configuración de rutas
-│   ├── main.jsx                    # Punto de entrada
-│   └── index.css                   # Estilos globales
-├── public/                         # Archivos estáticos
-├── .env.example                    # Variables de entorno (ejemplo)
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-├── postcss.config.js
-└── index.html
-```
-
-## 🔧 Configuración de Google Apps Script
-
-### 1. Crear el Script
-
-1. Ve a [Google Apps Script](https://script.google.com/)
-2. Crea un nuevo proyecto
-3. Usa este código básico como plantilla:
-
-```javascript
-function doPost(e) {
-	try {
-		const data = JSON.parse(e.postData.contents);
-
-		// Obtén tu hoja de cálculo de Google Sheets
-		const sheet = SpreadsheetApp.openById("YOUR_SPREADSHEET_ID").getSheetByName("Registros");
-
-		// Añade una nueva fila con los datos
-		sheet.appendRow([
-			new Date(),
-			data.nombreResponsable,
-			data.whatsapp,
-			data.nombreEmprendimiento,
-			data.instagram,
-			data.facebook,
-			data.descripcion,
-			data.archivoLogo?.name || "",
-		]);
-
-		return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
-	} catch (error) {
-		return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message })).setMimeType(
-			ContentService.MimeType.JSON
-		);
-	}
-}
-```
-
-### 2. Desplegar como Web App
-
-1. Click en "Implementar" → "Nueva implementación"
-2. Selecciona "Tipo: Aplicación web"
-3. Ejecutar como: Tu cuenta
-4. Acceso de quién puede acceder: Cualquiera
-5. Copia la URL de implementación
-
-### 3. Configurar en el proyecto
-
-Copia la URL de la implementación en tu archivo `.env`:
-
-```
-VITE_GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/d/YOUR_DEPLOYMENT_ID/usercodeapp
-```
-
-## 🔐 Configuración de reCAPTCHA
-
-1. Ve a [Google reCAPTCHA Console](https://www.google.com/recaptcha/admin)
-2. Crea un nuevo sitio
-3. Copia tu **Site Key**
-4. Añádelo a tu `.env`:
-
-```
-VITE_RECAPTCHA_KEY=YOUR_RECAPTCHA_SITE_KEY
-```
-
-## 🏗 Build para Producción
+## Build
 
 ```bash
+# Crear build para producción
 npm run build
-```
 
-Los archivos compilados se generarán en la carpeta `dist/`
-
-## 👀 Vista Previa de Producción
-
-```bash
+# Preview del build
 npm run preview
 ```
 
-## 📊 Payload del Formulario
+## Estructura del Proyecto
 
-El formulario envía exactamente este JSON a Google Apps Script:
-
-```json
-{
-	"nombreResponsable": "String",
-	"whatsapp": "String",
-	"nombreEmprendimiento": "String",
-	"instagram": "String",
-	"facebook": "String",
-	"descripcion": "String",
-	"archivoLogo": {
-		"data": "BASE64_ENCODED_IMAGE",
-		"mime": "image/jpeg",
-		"name": "filename.jpg"
-	},
-	"captchaToken": "String"
-}
+```
+src/
+├── components/          # Componentes React
+│   ├── common/         # Componentes compartidos
+│   ├── form/           # Componentes de formularios
+│   └── layout/         # Layout components
+├── hooks/              # Custom hooks
+├── utils/              # Funciones utilitarias
+├── pages/              # Páginas/rutas
+├── services/           # Servicios API
+├── constants.js        # Constantes globales
+└── App.jsx
 ```
 
-## 🎨 Personalización
+## Contribuir
 
-### Colores
+Ver [CONTRIBUTING.md](docs/CONTRIBUTING.md) para guías de contribución.
 
-Los colores principal (morado/lila) están definidos en `tailwind.config.js`:
+## Seguridad
 
-```javascript
-colors: {
-  primary: {
-    50: '#faf5ff',
-    100: '#f3e8ff',
-    // ... más tonos
-    900: '#581c87',
-  },
-}
-```
+Para reportar vulnerabilidades, ver [SECURITY.md](docs/SECURITY.md).
 
-Edita estos valores para cambiar la paleta de colores.
+## Código de Conducta
 
-### Contenido
+Este proyecto se adhiere al [Código de Conducta](docs/CODE_OF_CONDUCT.md).
 
-- **Landing Page**: Edita `src/pages/LandingPage.jsx`
-- **Formulario**: Edita `src/components/RegistrationForm.jsx`
-- **Navegación**: Edita `src/components/Navbar.jsx`
+## Licencia
 
-## 🐛 Troubleshooting
+MIT - Ver [LICENSE](LICENSE)
 
-### "VITE_GOOGLE_APPS_SCRIPT_URL is not defined"
+## Soporte
 
-Asegúrate de haber:
-
-1. Creado el archivo `.env`
-2. Añadido `VITE_GOOGLE_APPS_SCRIPT_URL`
-3. Reiniciado el servidor de desarrollo
-
-### "reCAPTCHA no está configurado"
-
-Añade `VITE_RECAPTCHA_KEY` a tu archivo `.env`
-
-### Las imágenes no se comprimen
-
-Verifica que:
-
-1. `browser-image-compression` está instalado (`npm install`)
-2. El archivo es una imagen válida (PNG, JPG, GIF)
-3. El tamaño es menor a 1MB
-
-## 📝 Variables de Entorno
-
-| Variable                      | Descripción                             | Obligatoria |
-| ----------------------------- | --------------------------------------- | ----------- |
-| `VITE_GOOGLE_APPS_SCRIPT_URL` | URL de tu Web App de Google Apps Script | ✅ Sí       |
-| `VITE_RECAPTCHA_KEY`          | Clave de sitio de reCAPTCHA             | ✅ Sí       |
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT.
-
-## 📧 Soporte
-
-Si tienes preguntas o necesitas ayuda, contacta a: `info@directorioemprendedor.com`
-
----
-
-**Hecho con ❤️ para emprendedores**
+- 📖 [Documentación](docs/)
+- 🐛 [Reportar bugs](https://github.com/tu-usuario/directorio-emprendedor/issues)
+- 💬 [Discusiones](https://github.com/tu-usuario/directorio-emprendedor/discussions)
