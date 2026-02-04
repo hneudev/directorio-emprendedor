@@ -84,9 +84,7 @@ export async function submitForm(formData) {
 
 		// Verificar estado de respuesta
 		if (!response.ok) {
-			throw new Error(
-				responseData?.message || `HTTP Error: ${response.status} ${response.statusText}`
-			);
+			throw new Error(responseData?.message || `HTTP Error: ${response.status} ${response.statusText}`);
 		}
 
 		return {
@@ -113,6 +111,7 @@ export async function submitForm(formData) {
 
 		throw new Error(userMessage);
 	}
+}
 
 /**
  * Helper function to validate the form data structure
