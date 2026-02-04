@@ -77,7 +77,7 @@ function doPost(e) {
 		}
 
 		// Retorna respuesta exitosa
-		return sendResponse(true, "Registro guardado exitosamente", 200);
+		return sendResponse(true, "Registro guardado exitosamente. Logo y foto del producto almacenados.", 200);
 	} catch (error) {
 		Logger.log("Error en doPost: " + error.toString());
 		return sendResponse(false, "Error al procesar el formulario: " + error.toString(), 500);
@@ -115,8 +115,18 @@ function agregarEncabezados(sheet) {
  */
 function guardarLogo(archivoLogo, nombreEmprendimiento) {
 	try {
+		// Valida que tenga datos
+		if (!archivoLogo.data) {
+			Logger.log("Advertencia: archivoLogo sin datos base64");
+			return;
+		}
+
 		// Decodifica el base64
-		const imageData = Utilities.newBlob(Utilities.base64Decode(archivoLogo.data), archivoLogo.mime, archivoLogo.name);
+		const imageData = Utilities.newBlob(
+			Utilities.base64Decode(archivoLogo.data),
+			archivoLogo.mime || "image/jpeg",
+			archivoLogo.name || "logo.jpg"
+		);
 
 		// Obtén o crea la carpeta 'Logos' en Drive
 		let folder = getFolderByName("Logos de Emprendedores");
@@ -129,10 +139,12 @@ function guardarLogo(archivoLogo, nombreEmprendimiento) {
 		const nombreArchivo = nombreEmprendimiento.replace(/\s+/g, "_") + "_logo" + extension;
 		const imageDataRenombrada = imageData.setName(nombreArchivo);
 
-		// Guarda el archivo
-		folder.createFile(imageDataRenombrada);
+		// Guarda el archivo en la carpeta
+		const savedFile = folder.createFile(imageDataRenombrada);
+
+		Logger.log("Logo guardado correctamente: " + savedFile.getName());
 	} catch (error) {
-		console.error("Error al guardar logo:", error);
+		Logger.log("Error al guardar logo: " + error.toString());
 		// No interrumpimos el proceso si falla el logo
 	}
 }
@@ -142,11 +154,17 @@ function guardarLogo(archivoLogo, nombreEmprendimiento) {
  */
 function guardarFotoProducto(fotoProducto, nombreEmprendimiento) {
 	try {
+		// Valida que tenga datos
+		if (!fotoProducto.data) {
+			Logger.log("Advertencia: fotoProducto sin datos base64");
+			return;
+		}
+
 		// Decodifica el base64
 		const imageData = Utilities.newBlob(
 			Utilities.base64Decode(fotoProducto.data),
-			fotoProducto.mime,
-			fotoProducto.name
+			fotoProducto.mime || "image/jpeg",
+			fotoProducto.name || "producto.jpg"
 		);
 
 		// Obtén o crea la carpeta 'Fotos de Productos' en Drive
@@ -160,10 +178,12 @@ function guardarFotoProducto(fotoProducto, nombreEmprendimiento) {
 		const nombreArchivo = nombreEmprendimiento.replace(/\s+/g, "_") + "_producto" + extension;
 		const imageDataRenombrada = imageData.setName(nombreArchivo);
 
-		// Guarda el archivo
-		folder.createFile(imageDataRenombrada);
+		// Guarda el archivo en la carpeta
+		const savedFile = folder.createFile(imageDataRenombrada);
+
+		Logger.log("Foto del producto guardada correctamente: " + savedFile.getName());
 	} catch (error) {
-		console.error("Error al guardar foto del producto:", error);
+		Logger.log("Error al guardar foto del producto: " + error.toString());
 		// No interrumpimos el proceso si falla la foto
 	}
 }
