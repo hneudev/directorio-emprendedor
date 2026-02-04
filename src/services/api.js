@@ -54,9 +54,9 @@ export async function submitForm(formData) {
 			{
 				method: "POST",
 				mode: "cors",
+				// Use a CORS-safelisted content-type to avoid a preflight OPTIONS request.
 				headers: {
-					"Content-Type": "application/json",
-					"X-Requested-With": "XMLHttpRequest",
+					"Content-Type": "text/plain;charset=UTF-8",
 				},
 				body: JSON.stringify(formData),
 				credentials: "omit", // No incluir credenciales por seguridad
@@ -146,7 +146,7 @@ export function validateFormData(data) {
 	}
 
 	if (data.fotoProducto2 && !data.fotoProducto2.data) {
-		errors.push(\"Archivo de segunda foto del producto inv?lido\");
+		errors.push("Archivo de segunda foto del producto inv?lido");
 	}
 
 	return {

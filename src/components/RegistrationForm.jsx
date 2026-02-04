@@ -338,10 +338,10 @@ export default function RegistrationForm() {
 			});
 			setFileName("");
 			setProductFileName("");
-			setSecondProductFileName(\"\");
+			setSecondProductFileName("");
 			setLogoPreview("");
 			setProductPreview("");
-			setSecondProductPreview(\"\");
+			setSecondProductPreview("");
 			if (fileInputRef.current) {
 				fileInputRef.current.value = "";
 			}
@@ -459,7 +459,7 @@ export default function RegistrationForm() {
 					name='whatsapp'
 					value={formData.whatsapp}
 					onChange={handleChange}
-				onBlur={handlePhoneBlur}
+					onBlur={handlePhoneBlur}
 					placeholder='+1234567890 o 1234567890'
 					required
 					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
@@ -680,7 +680,7 @@ export default function RegistrationForm() {
 								/>
 							</svg>
 							<p className='text-sm font-medium text-primary-700 dark:text-primary-300'>
-								{secondProductFileName ? `? ${secondProductFileName}` : 'Haz clic o arrastra una imagen'}
+								{secondProductFileName ? `✓ ${secondProductFileName}` : "Haz clic o arrastra una imagen"}
 							</p>
 							<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>PNG, JPG, GIF (max. 1MB)</p>
 						</div>

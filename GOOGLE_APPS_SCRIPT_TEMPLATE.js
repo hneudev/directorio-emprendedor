@@ -8,6 +8,11 @@
  * 2. Reemplaza 'YOUR_SPREADSHEET_ID' con el ID de tu hoja de cálculo
  * 3. Despliega como Web App
  * 4. Copia la URL de implementación en tu archivo .env
+ *
+ * NOTA CORS:
+ * Los Web Apps de Apps Script solo ejecutan doGet() y doPost().
+ * Las solicitudes OPTIONS (preflight) no se procesan, asi que el cliente debe
+ * enviar una "simple request" (por ejemplo Content-Type: text/plain).
  */
 
 // ID de tu Google Sheet (obtén este ID de la URL de tu hoja)
@@ -23,10 +28,20 @@ function doPost(e) {
 		let data = null;
 
 		// Intenta obtener los datos de diferentes formas
-		if (e && e.postData) {
-			if (typeof e.postData.contents === "string") {
-				data = JSON.parse(e.postData.contents);
+		if (e && e.postData && typeof e.postData.contents === "string") {
+			const contents = e.postData.contents.trim();
+			if (contents) {
+				try {
+					data = JSON.parse(contents);
+				} catch (jsonError) {
+					return sendResponse(false, "JSON invalido", 400);
+				}
 			}
+		}
+
+		// Si viene como form-url-encoded, usa e.parameter
+		if (!data && e && e.parameter && Object.keys(e.parameter).length > 0) {
+			data = e.parameter;
 		}
 
 		// Si no hay datos, retorna error
@@ -60,7 +75,7 @@ function doPost(e) {
 			data.descripcion || "",
 			data.archivoLogo?.name || "",
 			data.fotoProducto?.name || "",
-			data.fotoProducto2?.name || \"\",
+			data.fotoProducto2?.name || "",
 			data.captchaToken ? "Verificado" : "No verificado",
 		];
 
@@ -104,7 +119,7 @@ function agregarEncabezados(sheet) {
 		"Descripción",
 		"Archivo Logo",
 		"Foto del Producto",
-		\"Segunda Foto del Producto\",
+		"Segunda Foto del Producto",
 		"reCAPTCHA",
 	];
 
@@ -260,12 +275,6 @@ function sendResponse(success, message, statusCode) {
 	return output;
 }
 
-/**
- * Maneja las solicitudes OPTIONS (CORS preflight)
- */
-function doOptions(e) {
-	return sendResponse(true, "CORS preflight", 200);
-}
 
 /**
  * Función para probar el script localmente
@@ -296,3 +305,5 @@ function testDoPost() {
 	Logger.log("Resultado:");
 	Logger.log(resultado.getContent());
 }
+
+
