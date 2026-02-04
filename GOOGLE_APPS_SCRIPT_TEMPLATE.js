@@ -60,6 +60,7 @@ function doPost(e) {
 			data.descripcion || "",
 			data.archivoLogo?.name || "",
 			data.fotoProducto?.name || "",
+			data.fotoProducto2?.name || \"\",
 			data.captchaToken ? "Verificado" : "No verificado",
 		];
 
@@ -76,8 +77,13 @@ function doPost(e) {
 			guardarFotoProducto(data.fotoProducto, data.nombreEmprendimiento);
 		}
 
+		// Si hay una segunda foto del producto, gu?rdala en Drive
+		if (data.fotoProducto2 && data.fotoProducto2.data) {
+			guardarFotoProductoSecundaria(data.fotoProducto2, data.nombreEmprendimiento);
+		}
+
 		// Retorna respuesta exitosa
-		return sendResponse(true, "Registro guardado exitosamente. Logo y foto del producto almacenados.", 200);
+		return sendResponse(true, "Registro guardado exitosamente. Logo y fotos del producto almacenados.", 200);
 	} catch (error) {
 		Logger.log("Error en doPost: " + error.toString());
 		return sendResponse(false, "Error al procesar el formulario: " + error.toString(), 500);
@@ -98,6 +104,7 @@ function agregarEncabezados(sheet) {
 		"Descripción",
 		"Archivo Logo",
 		"Foto del Producto",
+		\"Segunda Foto del Producto\",
 		"reCAPTCHA",
 	];
 
@@ -189,6 +196,45 @@ function guardarFotoProducto(fotoProducto, nombreEmprendimiento) {
 }
 
 /**
+ * Guarda la segunda foto del producto en Google Drive
+ */
+function guardarFotoProductoSecundaria(fotoProducto2, nombreEmprendimiento) {
+	try {
+		// Valida que tenga datos
+		if (!fotoProducto2.data) {
+			Logger.log("Advertencia: fotoProducto2 sin datos base64");
+			return;
+		}
+
+		// Decodifica el base64
+		const imageData = Utilities.newBlob(
+			Utilities.base64Decode(fotoProducto2.data),
+			fotoProducto2.mime || "image/jpeg",
+			fotoProducto2.name || "producto_2.jpg"
+		);
+
+		// Obt?n o crea la carpeta 'Fotos de Productos' en Drive
+		let folder = getFolderByName("Fotos de Productos - Emprendedores");
+		if (!folder) {
+			folder = DriveApp.createFolder("Fotos de Productos - Emprendedores");
+		}
+
+		// Genera nombre de archivo con el nombre del emprendimiento
+		const extension = fotoProducto2.name.substring(fotoProducto2.name.lastIndexOf("."));
+		const nombreArchivo = nombreEmprendimiento.replace(/\s+/g, "_") + "_producto_2" + extension;
+		const imageDataRenombrada = imageData.setName(nombreArchivo);
+
+		// Guarda el archivo en la carpeta
+		const savedFile = folder.createFile(imageDataRenombrada);
+
+		Logger.log("Segunda foto del producto guardada correctamente: " + savedFile.getName());
+	} catch (error) {
+		Logger.log("Error al guardar segunda foto del producto: " + error.toString());
+		// No interrumpimos el proceso si falla la foto
+	}
+}
+
+/**
  * Obtiene una carpeta por nombre
  */
 function getFolderByName(folderName) {
@@ -234,6 +280,7 @@ function testDoPost() {
 		descripcion: "Descripción de mi emprendimiento",
 		archivoLogo: null,
 		fotoProducto: null,
+		fotoProducto2: null,
 		captchaToken: "test-token",
 	};
 

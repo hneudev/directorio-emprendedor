@@ -3,7 +3,7 @@ import toast, { Toaster } from "react-hot-toast";
 import ReCAPTCHA from "react-google-recaptcha";
 import imageCompression from "browser-image-compression";
 import { submitForm, validateFormData } from "../services/api";
-import { validateFile } from "../utils/validators";
+import { validateFile, validatePhone } from "../utils/validators";
 import { IMAGE_CONFIG } from "../constants";
 import { logger } from "../utils/logger";
 import SuccessModal from "./SuccessModal";
@@ -18,6 +18,7 @@ export default function RegistrationForm() {
 		descripcion: "",
 		archivoLogo: null,
 		fotoProducto: null,
+		fotoProducto2: null,
 		captchaToken: null,
 	});
 
@@ -27,8 +28,13 @@ export default function RegistrationForm() {
 	const [showModal, setShowModal] = useState(false);
 	const [fileName, setFileName] = useState("");
 	const [productFileName, setProductFileName] = useState("");
+	const [secondProductFileName, setSecondProductFileName] = useState("");
+	const [logoPreview, setLogoPreview] = useState("");
+	const [productPreview, setProductPreview] = useState("");
+	const [secondProductPreview, setSecondProductPreview] = useState("");
 	const fileInputRef = useRef(null);
 	const productFileInputRef = useRef(null);
+	const secondProductFileInputRef = useRef(null);
 	const recaptchaRef = useRef(null);
 
 	const RECAPTCHA_KEY = import.meta.env.VITE_RECAPTCHA_KEY;
@@ -41,21 +47,19 @@ export default function RegistrationForm() {
 		}));
 		setError("");
 
-		// Validación en tiempo real para WhatsApp
-		if (name === "whatsapp") {
-			if (
-				value &&
-				!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(value.replace(/\s/g, ""))
-			) {
-				toast.error("Por favor, ingresa un número de teléfono válido (ej: +1-555-123-4567 o 5551234567)");
-			}
-		}
-
 		// Validación en tiempo real para descripción mínima
 		if (name === "descripcion") {
 			if (value && value.trim().length < 10) {
 				// No mostrar error en tiempo real, solo validar al enviar
 			}
+		}
+	};
+
+	const handlePhoneBlur = (e) => {
+		const value = e.target.value;
+		const normalizedValue = value.replace(/\s/g, "");
+		if (normalizedValue && !validatePhone(normalizedValue)) {
+			toast.error("Por favor, ingresa un n?mero de tel?fono v?lido (ej: +1-555-123-4567 o 5551234567)");
 		}
 	};
 
@@ -119,6 +123,7 @@ export default function RegistrationForm() {
 					},
 				}));
 				setFileName(file.name);
+				setLogoPreview(event.target.result);
 				logger.info("Imagen comprimida y cargada", {
 					fileName: file.name,
 					compressedSize: compressedFile.size,
@@ -178,6 +183,11 @@ export default function RegistrationForm() {
 					},
 				}));
 				setProductFileName(file.name);
+				setProductPreview(event.target.result);
+				logger.info("Foto del producto comprimida y cargada", {
+					fileName: file.name,
+					compressedSize: compressedFile.size,
+				});
 				toast.success("Foto del producto cargada exitosamente");
 				setLoading(false);
 			};
@@ -186,6 +196,60 @@ export default function RegistrationForm() {
 		} catch (err) {
 			toast.error("Error al procesar la imagen: " + err.message);
 			productFileInputRef.current.value = "";
+			setLoading(false);
+		}
+	};
+
+	const handleSecondProductFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		try {
+			setError("");
+			setLoading(true);
+
+			// Check file type
+			if (!file.type.startsWith("image/")) {
+				toast.error("Por favor, selecciona un archivo de imagen (PNG, JPG, GIF)");
+				secondProductFileInputRef.current.value = "";
+				setLoading(false);
+				return;
+			}
+
+			// Compress image
+			const options = {
+				maxSizeMB: 1,
+				maxWidthOrHeight: 1920,
+				useWebWorker: true,
+			};
+
+			const compressedFile = await imageCompression(file, options);
+			const reader = new FileReader();
+
+			reader.onload = (event) => {
+				const base64String = event.target.result.split(",")[1];
+				setFormData((prev) => ({
+					...prev,
+					fotoProducto2: {
+						data: base64String,
+						mime: compressedFile.type,
+						name: file.name,
+					},
+				}));
+				setSecondProductFileName(file.name);
+				setSecondProductPreview(event.target.result);
+				logger.info("Segunda foto del producto comprimida y cargada", {
+					fileName: file.name,
+					compressedSize: compressedFile.size,
+				});
+				toast.success("Segunda foto del producto cargada exitosamente");
+				setLoading(false);
+			};
+
+			reader.readAsDataURL(compressedFile);
+		} catch (err) {
+			toast.error("Error al procesar la imagen: " + err.message);
+			secondProductFileInputRef.current.value = "";
 			setLoading(false);
 		}
 	};
@@ -212,18 +276,13 @@ export default function RegistrationForm() {
 				toast.error("Por favor, ingresa el nombre del responsable");
 				return;
 			}
-
-			// Validar WhatsApp
 			if (!formData.whatsapp.trim()) {
 				toast.error("Por favor, ingresa un número de WhatsApp");
 				return;
 			}
-			if (
-				!/^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(
-					formData.whatsapp.replace(/\s/g, "")
-				)
-			) {
-				toast.error("Por favor, ingresa un número de teléfono válido (ej: +1-555-123-4567 o 5551234567)");
+			const normalizedWhatsapp = formData.whatsapp.replace(/\s/g, "");
+			if (!validatePhone(normalizedWhatsapp)) {
+				toast.error("Por favor, ingresa un n?mero de tel?fono v?lido (ej: +1-555-123-4567 o 5551234567)");
 				return;
 			}
 
@@ -274,15 +333,23 @@ export default function RegistrationForm() {
 				descripcion: "",
 				archivoLogo: null,
 				fotoProducto: null,
+				fotoProducto2: null,
 				captchaToken: null,
 			});
 			setFileName("");
 			setProductFileName("");
+			setSecondProductFileName(\"\");
+			setLogoPreview("");
+			setProductPreview("");
+			setSecondProductPreview(\"\");
 			if (fileInputRef.current) {
 				fileInputRef.current.value = "";
 			}
 			if (productFileInputRef.current) {
 				productFileInputRef.current.value = "";
+			}
+			if (secondProductFileInputRef.current) {
+				secondProductFileInputRef.current.value = "";
 			}
 			if (recaptchaRef.current) {
 				recaptchaRef.current.reset();
@@ -302,6 +369,7 @@ export default function RegistrationForm() {
 			formData.descripcion.trim() &&
 			formData.archivoLogo &&
 			formData.fotoProducto &&
+			formData.fotoProducto2 &&
 			formData.captchaToken &&
 			!loading
 		);
@@ -391,6 +459,7 @@ export default function RegistrationForm() {
 					name='whatsapp'
 					value={formData.whatsapp}
 					onChange={handleChange}
+				onBlur={handlePhoneBlur}
 					placeholder='+1234567890 o 1234567890'
 					required
 					className='w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition'
@@ -511,6 +580,16 @@ export default function RegistrationForm() {
 						</div>
 					</label>
 				</div>
+				{logoPreview && (
+					<div className='mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+						<p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Vista previa:</p>
+						<img
+							src={logoPreview}
+							alt='Logo preview'
+							className='max-w-full h-auto max-h-48 rounded-lg mx-auto object-contain'
+						/>
+					</div>
+				)}
 			</div>
 
 			{/* File Upload - Foto del Producto */}
@@ -554,6 +633,69 @@ export default function RegistrationForm() {
 						</div>
 					</label>
 				</div>
+				{productPreview && (
+					<div className='mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+						<p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Vista previa:</p>
+						<img
+							src={productPreview}
+							alt='Producto preview'
+							className='max-w-full h-auto max-h-48 rounded-lg mx-auto object-contain'
+						/>
+					</div>
+				)}
+			</div>
+
+			{/* File Upload - Segunda Foto del Producto */}
+			<div>
+				<label
+					htmlFor='fotoProducto2'
+					className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+					Segunda Foto del Producto del Negocio *
+				</label>
+				<div className='relative'>
+					<input
+						type='file'
+						id='fotoProducto2'
+						name='fotoProducto2'
+						ref={secondProductFileInputRef}
+						onChange={handleSecondProductFileChange}
+						accept='image/*'
+						required
+						className='hidden'
+					/>
+					<label
+						htmlFor='fotoProducto2'
+						className='flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-primary-300 dark:border-primary-700 rounded-lg bg-primary-50 dark:bg-primary-900 hover:bg-primary-100 dark:hover:bg-primary-800 cursor-pointer transition'>
+						<div className='text-center'>
+							<svg
+								className='w-8 h-8 text-primary-600 dark:text-primary-400 mx-auto mb-2'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M12 4v16m8-8H4'
+								/>
+							</svg>
+							<p className='text-sm font-medium text-primary-700 dark:text-primary-300'>
+								{secondProductFileName ? `? ${secondProductFileName}` : 'Haz clic o arrastra una imagen'}
+							</p>
+							<p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>PNG, JPG, GIF (max. 1MB)</p>
+						</div>
+					</label>
+				</div>
+				{secondProductPreview && (
+					<div className='mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg'>
+						<p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Vista previa:</p>
+						<img
+							src={secondProductPreview}
+							alt='Segunda foto del producto preview'
+							className='max-w-full h-auto max-h-48 rounded-lg mx-auto object-contain'
+						/>
+					</div>
+				)}
 			</div>
 
 			{/* reCAPTCHA */}

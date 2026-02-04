@@ -29,6 +29,7 @@ export default function PrivacyPolicy() {
 							<li>Enlace de Facebook (si lo proporcionas)</li>
 							<li>Logo del negocio (imagen)</li>
 							<li>Foto del producto (imagen)</li>
+						<li>Segunda foto del producto (imagen)</li>
 						</ul>
 					</section>
 

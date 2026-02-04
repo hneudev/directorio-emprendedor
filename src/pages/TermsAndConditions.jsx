@@ -75,7 +75,7 @@ export default function TermsAndConditions() {
 					<section className='mb-8'>
 						<h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>7. Derechos de Imagen</h2>
 						<p className='text-gray-600 dark:text-gray-300 mb-4'>
-							Al registrarte, garantizas que tienes derecho a usar todas las imágenes (logo, foto de producto) que
+							Al registrarte, garantizas que tienes derecho a usar todas las imágenes (logo, foto de producto, segunda foto de producto) que
 							subas. Emitimos una licencia no exclusiva para mostrar estas imágenes en nuestro directorio.
 						</p>
 					</section>

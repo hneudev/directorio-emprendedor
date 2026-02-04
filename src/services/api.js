@@ -46,6 +46,7 @@ export async function submitForm(formData) {
 		logger.info("Submitting form data", {
 			hasLogo: !!formData.archivoLogo,
 			hasProduct: !!formData.fotoProducto,
+			hasSecondProduct: !!formData.fotoProducto2,
 		});
 
 		const response = await fetchWithTimeout(
@@ -124,6 +125,7 @@ export function validateFormData(data) {
 		"descripcion",
 		"archivoLogo",
 		"fotoProducto",
+		"fotoProducto2",
 		"captchaToken",
 	];
 
@@ -141,6 +143,10 @@ export function validateFormData(data) {
 
 	if (data.fotoProducto && !data.fotoProducto.data) {
 		errors.push("Archivo de foto del producto inválido");
+	}
+
+	if (data.fotoProducto2 && !data.fotoProducto2.data) {
+		errors.push(\"Archivo de segunda foto del producto inv?lido\");
 	}
 
 	return {
