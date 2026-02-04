@@ -81,24 +81,11 @@ src/
 └── App.jsx
 ```
 
-## Contribuir
-
-Ver [CONTRIBUTING.md](docs/CONTRIBUTING.md) para guías de contribución.
-
-## Seguridad
-
-Para reportar vulnerabilidades, ver [SECURITY.md](docs/SECURITY.md).
-
-## Código de Conducta
-
-Este proyecto se adhiere al [Código de Conducta](docs/CODE_OF_CONDUCT.md).
-
 ## Licencia
 
 MIT - Ver [LICENSE](LICENSE)
 
 ## Soporte
 
-- 📖 [Documentación](docs/)
 - 🐛 [Reportar bugs](https://github.com/tu-usuario/directorio-emprendedor/issues)
 - 💬 [Discusiones](https://github.com/tu-usuario/directorio-emprendedor/discussions)
